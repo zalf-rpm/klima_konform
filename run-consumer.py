@@ -15,31 +15,27 @@
 # Landscape Systems Analysis at the ZALF.
 # Copyright (C: Leibniz Centre for Agricultural Landscape Research (ZALF)
 
-import sys
-#print sys.path
-
-import gc
-import csv
-import types
-import os
-import json
-import timeit
-from datetime import datetime
 from collections import defaultdict, OrderedDict
+import csv
+from datetime import datetime
+import json
+import gc
 import numpy as np
+import os
+from pyproj import CRS, Transformer
 import sqlite3
-
+import sys
+import timeit
+import types
 import zmq
-#print "pyzmq version: ", zmq.pyzmq_version(), " zmq version: ", zmq.zmq_version()
 
 import monica_io3
 import soil_io3
-#print "path to monica_io: ", monica_io.__file__
 import monica_run_lib as Mrunlib
 
 PATHS = {
     "mbm-local-remote": {
-        "path-to-data-dir": "monica-data/data/",
+        "path-to-data-dir": "data/",
         "path-to-output-dir": "out/",
         "path-to-csv-output-dir": "csv-out/"
     },
@@ -51,10 +47,8 @@ PATHS = {
 }
 DEFAULT_HOST = "login01.cluster.zalf.de" # "localhost" 
 DEFAULT_PORT = "7777"
-TEMPLATE_SOIL_PATH = "{local_path_to_data_dir}germany/BUEK200_1000_gk5.asc"
+TEMPLATE_SOIL_PATH = "{local_path_to_data_dir}germany/buek200_1000_gk5.asc"
 TEMPLATE_CORINE_PATH = "{local_path_to_data_dir}germany/landuse_1000_gk5.asc"
-#TEMPLATE_SOIL_PATH = "{local_path_to_data_dir}germany/BUEK250_1000_gk5.asc"
-#DATA_SOIL_DB = "germany/buek200.sqlite"
 USE_CORINE = False
 
 def create_output(msg):
@@ -79,7 +73,7 @@ def create_output(msg):
     return cm_count_to_vals
 
 
-def write_row_to_grids(row_col_data, row, ncols, header, path_to_output_dir, path_to_csv_output_dir, setup_id, is_bgr):
+def write_row_to_grids(row_col_data, row, ncols, header, path_to_output_dir, path_to_csv_output_dir, setup_id):
     "write grids row by row"
     
     if not hasattr(write_row_to_grids, "nodata_row_count"):
@@ -88,60 +82,13 @@ def write_row_to_grids(row_col_data, row, ncols, header, path_to_output_dir, pat
 
     make_dict_nparr = lambda: defaultdict(lambda: np.full((ncols,), -9999, dtype=np.float))
     
-    if is_bgr:
-        output_grids = {}
-        for i in range(1,21):
-            output_grids[f'Mois_{i}'] = {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4}
-            output_grids[f'STemp_{i}'] = {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4}
-        output_keys = ["Mois", "STemp"]
-    else:
-        output_grids = {
-            "sdoy": {"data" : make_dict_nparr(), "cast-to": "int"},
-            "ssm03": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "ssm36": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "ssm69": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            
-            "s2doy": {"data" : make_dict_nparr(), "cast-to": "int"},
-            "s2sm03": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "s2sm36": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "s2sm69": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-
-            "sedoy": {"data" : make_dict_nparr(), "cast-to": "int"},
-            "sesm03": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "sesm36": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "sesm69": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-
-            "s3doy": {"data" : make_dict_nparr(), "cast-to": "int"},
-            "s3sm03": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "s3sm36": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "s3sm69": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-
-            "s4doy": {"data" : make_dict_nparr(), "cast-to": "int"},
-            "s4sm03": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "s4sm36": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "s4sm69": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-
-            "s5doy": {"data" : make_dict_nparr(), "cast-to": "int"},
-            "s5sm03": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "s5sm36": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "s5sm69": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-
-            "s6doy": {"data" : make_dict_nparr(), "cast-to": "int"},
-            "s6sm03": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "s6sm36": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "s6sm69": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-
-            "s7doy": {"data" : make_dict_nparr(), "cast-to": "int"},
-            "s7sm03": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "s7sm36": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "s7sm69": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-
-            "hdoy": {"data" : make_dict_nparr(), "cast-to": "int"},
-            "hsm03": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "hsm36": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-            "hsm69": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
-        }
-        output_keys = list(output_grids.keys())
+    output_grids = {
+        "Yield": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 1},
+        "TraDef": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 2},
+        "HeatRed": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 2},
+        "FrostRed": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 2},
+    }
+    output_keys = list(output_grids.keys())
 
     cmc_to_crop = {}
 
@@ -248,10 +195,8 @@ def run_consumer(leave_after_finished_run = True, server = {"server": None, "por
         "mode": "mbm-local-remote",
         "port": server["port"] if server["port"] else DEFAULT_PORT,
         "server": server["server"] if server["server"] else DEFAULT_HOST, 
-        "start-row": "0",
-        "end-row": "-1",
+        "gk4-tl-br-bounds": "[[4450260.1496340110898018,5716481.4597823247313499],[4578413.4585373029112816,5548602.9990254063159227]]",
         "shared_id": shared_id,
-        "no-of-setups": 10,
         "timeout": 600000 # 10 minutes
     }
 
@@ -286,17 +231,70 @@ def run_consumer(leave_after_finished_run = True, server = {"server": None, "por
     soil_metadata, header = Mrunlib.read_header(path_to_soil_grid)
     soil_grid_template = np.loadtxt(path_to_soil_grid, dtype=int, skiprows=6)
 
+    scols = int(soil_metadata["ncols"])
+    srows = int(soil_metadata["nrows"])
+    scellsize = int(soil_metadata["cellsize"])
+    xllcorner = int(soil_metadata["xllcorner"])
+    yllcorner = int(soil_metadata["yllcorner"])
+
+    if config["gk4-tl-br-bounds"] is None or config["gk4-tl-br-bounds"] == "":
+        bounds = None
+    else:
+        gk5 = CRS.from_epsg(31469) 
+        gk4 = CRS.from_epsg(5678)
+        gk5_to_gk4_transformer = Transformer.from_crs(gk5, gk4, always_xy=True) 
+        ((tl_r_gk4, tl_h_gk4), (br_r_gk4, br_h_gk4)) = json.loads(config["gk4-tl-br-bounds"])
+
+        bounds = {"tl": [srows, scols], "br": [0, 0]}
+        #bounds_gk4 = {"tl": [srows, scols], "br": [0, 0]}
+
+        for srow in range(0, srows):
+                #print(srow,)
+                
+                sh_upper_col0_gk5 = yllcorner + scellsize + (srows - srow - 1) * scellsize
+                sh_lower_col0_gk5 = yllcorner + (srows - srow - 1) * scellsize
+                sr_col0_gk5 = xllcorner + (scellsize / 2)
+                row_upper_r_gk4, row_upper_h_gk4 = gk5_to_gk4_transformer.transform(sr_col0_gk5, sh_upper_col0_gk5)
+                row_lower_r_gk4, row_lower_h_gk4 = gk5_to_gk4_transformer.transform(sr_col0_gk5, sh_lower_col0_gk5)
+
+                if row_lower_h_gk4 < br_h_gk4 or row_upper_h_gk4 > tl_h_gk4:
+                    continue 
+
+                for scol in range(0, scols):
+
+                    sh_col_gk5 = yllcorner + (scellsize / 2) + (srows - srow - 1) * scellsize
+                    sr_left_col_gk5 = xllcorner + scol * scellsize
+                    sr_right_col_gk5 = xllcorner + scellsize + scol * scellsize
+                    col_left_r_gk4, col_left_h_gk4 = gk5_to_gk4_transformer.transform(sr_left_col_gk5, sh_col_gk5)
+                    col_right_r_gk4, col_right_h_gk4 = gk5_to_gk4_transformer.transform(sr_right_col_gk5, sh_col_gk5)
+
+                    if col_left_r_gk4 < tl_r_gk4 or col_right_r_gk4 > br_r_gk4:
+                        #print(col_left_r_gk4, "<", tl_r_gk4, "or", col_right_r_gk4, ">", br_r_gk4)
+                        continue 
+
+                    if bounds["tl"][0] > srow:
+                        bounds["tl"][0] = srow
+                        #bounds_gk4["tl"][0] = row_upper_h_gk4
+                    if bounds["tl"][1] > scol:
+                        bounds["tl"][1] = scol
+                        #bounds_gk4["tl"][1] = col_left_r_gk4
+                    if bounds["br"][0] < srow:
+                        bounds["br"][0] = srow
+                        #bounds_gk4["br"][0] = row_lower_h_gk4
+                    if bounds["br"][1] < scol:
+                        bounds["br"][1] = scol
+                        #bounds_gk4["br"][1] = col_right_r_gk4
+
+        print("bounds:", bounds)
+        #print(bounds_gk4)
+        soil_grid_template= soil_grid_template[bounds["tl"][0]:bounds["br"][0]+1, bounds["tl"][1]:bounds["br"][1]+1]
+    
+
     if USE_CORINE:
         path_to_corine_grid = TEMPLATE_CORINE_PATH.format(local_path_to_data_dir=paths["path-to-data-dir"])
         corine_meta, _ = Mrunlib.read_header(path_to_corine_grid)
         corine_grid = np.loadtxt(path_to_corine_grid, dtype=int, skiprows=6)
         corine_gk5_interpolate = Mrunlib.create_ascii_grid_interpolator(corine_grid, corine_meta)
-
-        scols = int(soil_metadata["ncols"])
-        srows = int(soil_metadata["nrows"])
-        scellsize = int(soil_metadata["cellsize"])
-        xllcorner = int(soil_metadata["xllcorner"])
-        yllcorner = int(soil_metadata["yllcorner"])
 
         for srow in range(0, srows):
             #print(srow)
@@ -324,19 +322,15 @@ def run_consumer(leave_after_finished_run = True, server = {"server": None, "por
     #count cols in rows
     datacells_per_row = np.sum(soil_grid_template, axis=1)
 
-    start_row = int(config["start-row"])
-    end_row = int(config["end-row"])
-    ncols = int(soil_metadata["ncols"])
     setup_id_to_data = defaultdict(lambda: {
-        "start_row": start_row,
-        "end_row": end_row,
-        "nrows": end_row - start_row + 1 if start_row > 0 and end_row >= start_row else int(soil_metadata["nrows"]),
-        "ncols": ncols,
+        "end_row": -1,
+        "nrows": soil_grid_template.shape[0],
+        "ncols": soil_grid_template.shape[1],
         "header": header,
         "out_dir_exists": False,
         "row-col-data": defaultdict(lambda: defaultdict(list)),
         "datacell-count": datacells_per_row.copy(),
-        "next-row": start_row
+        "next-row": 0
     })
 
     def process_message(msg):
@@ -351,18 +345,14 @@ def run_consumer(leave_after_finished_run = True, server = {"server": None, "por
 
         leave = False
 
-        if not write_normal_output_files and not msg["customId"]["bgr"]:
+        if not write_normal_output_files:
             custom_id = msg["customId"]
             setup_id = custom_id["setup_id"]
-            is_bgr = custom_id["bgr"]
 
             data = setup_id_to_data[setup_id]
 
-            row = custom_id["srow"]
-            col = custom_id["scol"]
-            #crow = custom_id.get("crow", -1)
-            #ccol = custom_id.get("ccol", -1)
-            #soil_id = custom_id.get("soil_id", -1)
+            row = custom_id["row"] 
+            col = custom_id["col"]
 
             debug_msg = "received work result " + str(process_message.received_env_count) + " customId: " + str(msg.get("customId", "")) \
             + " next row: " + str(data["next-row"]) \
@@ -401,7 +391,7 @@ def run_consumer(leave_after_finished_run = True, server = {"server": None, "por
                             exit(1)
                 
                 write_row_to_grids(data["row-col-data"], data["next-row"], data["ncols"], data["header"], \
-                    path_to_out_dir, path_to_csv_out_dir, setup_id, is_bgr)
+                    path_to_out_dir, path_to_csv_out_dir, setup_id)
                 
                 debug_msg = "wrote row: "  + str(data["next-row"]) + " next-row: " + str(data["next-row"]+1) + " rows unwritten: " + str(list(data["row-col-data"].keys()))
                 print(debug_msg)
@@ -410,17 +400,10 @@ def run_consumer(leave_after_finished_run = True, server = {"server": None, "por
                 data["next-row"] += 1 # move to next row (to be written)
 
                 if leave_after_finished_run \
-                and ((data["end_row"] < 0 and data["next-row"] > data["nrows"]-1) \
-                    or (data["end_row"] >= 0 and data["next-row"] > data["end_row"])): 
-                    
+                and (data["next-row"] > data["nrows"]-1 or data["next-row"] > data["end_row"]): 
                     process_message.setup_count += 1
-                    # if all setups are done, the run_setups list should be empty and we can return
-                    if process_message.setup_count >= int(config["no-of-setups"]):
-                        print("c: all results received, exiting")
-                        leave = True
-                        break
                 
-        elif msg["customId"]["bgr"]:
+        elif write_normal_output_files:
 
             if msg.get("type", "") in ["jobs-per-cell", "no-data", "setup_data"]:
                 #print "ignoring", result.get("type", "")
@@ -432,9 +415,6 @@ def run_consumer(leave_after_finished_run = True, server = {"server": None, "por
             setup_id = custom_id["setup_id"]
             row = custom_id["srow"]
             col = custom_id["scol"]
-            #crow = custom_id.get("crow", -1)
-            #ccol = custom_id.get("ccol", -1)
-            #soil_id = custom_id.get("soil_id", -1)
             
             process_message.wnof_count += 1
 

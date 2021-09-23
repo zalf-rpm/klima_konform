@@ -30,7 +30,7 @@ import zmq
 import sqlite3
 import sqlite3 as cas_sq3
 import numpy as np
-from pyproj import CRS, transform
+from pyproj import CRS, Transformer
 
 import monica_io3
 import soil_io3
@@ -42,12 +42,11 @@ PATHS = {
         "include-file-base-path": "/home/berg/GitHub/monica-parameters/", # path to monica-parameters
         "path-to-climate-dir": "/run/user/1000/gvfs/sftp:host=login01.cluster.zalf.de,user=rpm/beegfs/common/data/climate/dwd_core_ensemble/", # mounted path to archive or hard drive with climate data 
         "monica-path-to-climate-dir": "/monica_data/climate-data/dwd_core_ensemble/csvs_dwd_core_ensemble/", # mounted path to archive accessable by monica executable
-        "path-to-data-dir": "./monica-data/data/", # mounted path to archive or hard drive with data 
-        "path-to-projects-dir": "./monica-data/data/projects/",
+        "path-to-data-dir": "data/", # mounted path to archive or hard drive with data 
         "path-debug-write-folder": "./debug-out/",
     },
     "remoteProducer-remoteMonica": {
-        "include-file-base-path": "/project/monica-parameters/", # path to monica-parameters
+        "include-file-base-path": "/monica-parameters/", # path to monica-parameters
         "path-to-climate-dir": "/data/dwd_core_ensemble/", # mounted path to archive or hard drive with climate data 
         "monica-path-to-climate-dir": "/monica_data/climate-data/dwd_core_ensemble/csvs_dwd_core_ensemble/", # mounted path to archive accessable by monica executable
         "path-to-data-dir": "./monica-data/data/", # mounted path to archive or hard drive with data 
@@ -58,14 +57,14 @@ PATHS = {
 
 DEFAULT_HOST = "login01.cluster.zalf.de" # "localhost" #
 DEFAULT_PORT = "6666"
-RUN_SETUP = "[3]"
+RUN_SETUP = "[2]"
 SETUP_FILE = "sim_setups.csv"
 PROJECT_FOLDER = "monica-germany/"
 DATA_SOIL_DB = "germany/buek200.sqlite"
 DATA_GRID_HEIGHT = "germany/dem_1000_gk5.asc" 
 DATA_GRID_SLOPE = "germany/slope_1000_gk5.asc"
 DATA_GRID_LAND_USE = "germany/landuse_1000_gk5.asc"
-DATA_GRID_SOIL = "germany/BUEK200_1000_gk5.asc"
+DATA_GRID_SOIL = "germany/buek200_1000_gk5.asc"
 TEMPLATE_PATH_LATLON = "{path_to_climate_dir}/latlon-to-rowcol.json"
 TEMPLATE_PATH_CLIMATE_CSV = "{gcm}/{rcm}/{scenario}/{ensmem}/{version}/row-{crow}/col-{ccol}.csv"
 GEO_TARGET_GRID=31469 #proj4 -> 3-degree gauss-kruger zone 5 (=Germany) https://epsg.io/5835 ###https://epsg.io/31469
@@ -93,8 +92,8 @@ def run_producer(server = {"server": None, "port": None}, shared_id = None):
         "mode": "mbm-local-remote",
         "server-port": server["port"] if server["port"] else DEFAULT_PORT,
         "server": server["server"] if server["server"] else DEFAULT_HOST,
-        "start-row": "0", 
-        "end-row": "-1",
+        "gk4-bl-tr-bounds": "[[4450260.1496340110898018,5548602.9990254063159227],[4578413.4585373029112816,5716481.4597823247313499]]",
+        "gk4-tl-br-bounds": "[[4450260.1496340110898018,5716481.4597823247313499],[4578413.4585373029112816,5548602.9990254063159227]]",
         "sim.json": TEMPLATE_SIM_JSON,
         "crop.json": TEMPLATE_CROP_JSON,
         "site.json": TEMPLATE_SITE_JSON,
@@ -128,7 +127,10 @@ def run_producer(server = {"server": None, "port": None}, shared_id = None):
     #transforms geospatial coordinates from one coordinate reference system to another
     # transform wgs84 into gk5
     wgs84 = CRS.from_epsg(4326) #proj4 -> (World Geodetic System 1984 https://epsg.io/4326)
-    gk5 = CRS.from_epsg(GEO_TARGET_GRID) 
+    gk5 = CRS.from_epsg(31469) 
+    gk4 = CRS.from_epsg(5678)
+    gk5_to_gk4_transformer = Transformer.from_crs(gk5, gk4, always_xy=True) 
+    ((tl_r_gk4, tl_h_gk4), (br_r_gk4, br_h_gk4)) = json.loads(config["gk4-tl-br-bounds"])
 
     # Load grids
     ## note numpy is able to load from a compressed file, ending with .gz or .bz2
@@ -195,17 +197,6 @@ def run_producer(server = {"server": None, "port": None}, shared_id = None):
             sim_json["climate.csv-options"]["end-date"] = str(setup["end_date"]) 
         sim_json["include-file-base-path"] = paths["include-file-base-path"]
 
-        if setup["bgr"]:
-            if setup["nc_mode"]:
-                sim_json["output"]["events"] = sim_json["output"]["nc-bgr-events"]
-            else:
-                sim_json["output"]["events"] = sim_json["output"]["bgr-events"]
-        else:
-            if setup["nc_mode"]:
-                sim_json["output"]["events"] = sim_json["output"]["nc-events"]
-
-        sim_json["output"]["obj-outputs?"] = not setup["nc_mode"] and not setup["bgr"]
-
         # read template site.json 
         with open(setup.get("site.json", config["site.json"])) as _:
             site_json = json.load(_)
@@ -234,18 +225,59 @@ def run_producer(server = {"server": None, "port": None}, shared_id = None):
         xllcorner = int(soil_metadata["xllcorner"])
         yllcorner = int(soil_metadata["yllcorner"])
 
-        #unknown_soil_ids = set()
-        soil_id_cache = {}
-        print("All Rows x Cols: " + str(srows) + "x" + str(scols))
+
+        bounds = {"tl": [srows, scols], "br": [0, 0]}
+        #bounds_gk4 = {"tl": [srows, scols], "br": [0, 0]}
+
         for srow in range(0, srows):
-            print(srow,)
+            #print(srow,)
             
-            if srow < int(config["start-row"]):
-                continue
-            elif int(config["end-row"]) > 0 and srow > int(config["end-row"]):
-                break
+            sh_upper_col0_gk5 = yllcorner + scellsize + (srows - srow - 1) * scellsize
+            sh_lower_col0_gk5 = yllcorner + (srows - srow - 1) * scellsize
+            sr_col0_gk5 = xllcorner + (scellsize / 2)
+            row_upper_r_gk4, row_upper_h_gk4 = gk5_to_gk4_transformer.transform(sr_col0_gk5, sh_upper_col0_gk5)
+            row_lower_r_gk4, row_lower_h_gk4 = gk5_to_gk4_transformer.transform(sr_col0_gk5, sh_lower_col0_gk5)
+
+            if row_lower_h_gk4 < br_h_gk4 or row_upper_h_gk4 > tl_h_gk4:
+                continue 
 
             for scol in range(0, scols):
+
+                sh_col_gk5 = yllcorner + (scellsize / 2) + (srows - srow - 1) * scellsize
+                sr_left_col_gk5 = xllcorner + scol * scellsize
+                sr_right_col_gk5 = xllcorner + scellsize + scol * scellsize
+                col_left_r_gk4, col_left_h_gk4 = gk5_to_gk4_transformer.transform(sr_left_col_gk5, sh_col_gk5)
+                col_right_r_gk4, col_right_h_gk4 = gk5_to_gk4_transformer.transform(sr_right_col_gk5, sh_col_gk5)
+
+                if col_left_r_gk4 < tl_r_gk4 or col_right_r_gk4 > br_r_gk4:
+                    #print(col_left_r_gk4, "<", tl_r_gk4, "or", col_right_r_gk4, ">", br_r_gk4)
+                    continue 
+
+                if bounds["tl"][0] > srow:
+                    bounds["tl"][0] = srow
+                    #bounds_gk4["tl"][0] = row_upper_h_gk4
+                if bounds["tl"][1] > scol:
+                    bounds["tl"][1] = scol
+                    #bounds_gk4["tl"][1] = col_left_r_gk4
+                if bounds["br"][0] < srow:
+                    bounds["br"][0] = srow
+                    #bounds_gk4["br"][0] = row_lower_h_gk4
+                if bounds["br"][1] < scol:
+                    bounds["br"][1] = scol
+                    #bounds_gk4["br"][1] = col_right_r_gk4
+
+        print("bounds:", bounds)
+
+        #unknown_soil_ids = set()
+
+        soil_id_cache = {}
+        for row in range(0, bounds["br"][0]-bounds["tl"][0]+1+1):
+            srow = bounds["tl"][0] + row
+            print(srow,)
+            
+            for col in range(0, bounds["br"][1]-bounds["tl"][1]+1+1):
+                scol = bounds["tl"][1] + col
+
                 soil_id = int(soil_grid[srow, scol])
                 if soil_id == -9999:
                     continue
@@ -277,7 +309,6 @@ def run_producer(server = {"server": None, "port": None}, shared_id = None):
                 slope = slope_gk5_interpolate(sr_gk5, sh_gk5)
 
                 env_template["params"]["userCropParameters"]["__enable_T_response_leaf_expansion__"] = setup["LeafExtensionModifier"]
-
                     
                 #print("soil:", soil_profile)
                 env_template["params"]["siteParameters"]["SoilProfileParameters"] = soil_profile
@@ -346,10 +377,9 @@ def run_producer(server = {"server": None, "port": None}, shared_id = None):
 
                 env_template["customId"] = {
                     "setup_id": setup_id,
-                    "srow": srow, "scol": scol,
+                    "row": row, "col": col,
                     "crow": int(crow), "ccol": int(ccol),
                     "soil_id": soil_id,
-                    "bgr": setup["bgr"],
                     "env_id": sent_env_count
                 }
 
