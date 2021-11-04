@@ -13,7 +13,7 @@
 	
 	"debug?": false,
 	"path-to-output": "./",
-	"include-file-base-path": "/will/be/overwritten/path/to/monica/parameters",
+	"include-file-base-path": "data/params/",
 	
 	"output": { 
 	  "write-file?": false,

@@ -1,10 +1,4 @@
-  {
-	"fert-params": {
-		"AN": ["include-from-file", "mineral-fertilisers/AN.json"],
-		"urea": ["include-from-file", "mineral-fertilisers/U.json"],
-		"org_fert": ["include-from-file", "organic-fertilisers/CAM.json"]
-	}, 	
-
+{
 	"__note__": "Adapted from HERMES2Go, BBG Project",
 	"cropRotationTemplates": {
 		"WW": [{
@@ -14,10 +8,10 @@
 					"crop": {
 						"is-winter-crop": true,
 						"cropParams": {
-							"species": ["include-from-file", "crops/wheat.json"],
-							"cultivar": ["include-from-file", "crops/wheat/winter-wheat.json"]
+							"species": ["include-from-file", "crops/species/wheat.json"],
+							"cultivar": ["include-from-file", "crops/cultivars/winter-wheat_bs.json"]
 						},
-						"residueParams": ["include-from-file", "crop-residues/wheat.json"]
+						"residueParams": ["include-from-file", "crops/residues/wheat.json"]
 					},
 					"earliest-date": "0000-10-01",
 					"latest-date": "0000-11-10",
@@ -48,47 +42,10 @@
 					"crop": {
 						"is-winter-crop": true,
 						"cropParams": {
-							"species": {
-								"=": ["include-from-file", "projects/sustag/barley.json"],
-								"_FieldConditionModifier":1.2
-							},
-							"cultivar": {
-								"=": ["include-from-file", "projects/sustag/winter-barley.json"],
-								"FrostDehardening":5.05,
-								"FrostHardening":0.018,
-								"HeatSumIrrigationEnd":1032,
-								"HeatSumIrrigationStart":560,
-								"LT50cultivar":-15,
-								"LatestHarvestDoy":-1,
-								"LowTemperatureExposure":0.654,
-								"MaxAssimilationRate":30,
-								"OrganIdsForSecondaryYield": [
-									{
-										"organId": 2,
-										"type": "YieldComponent",
-										"yieldDryMatter": 0.86,
-										"yieldPercentage": 1
-									},
-									{
-										"organId": 3,
-										"type": "YieldComponent",
-										"yieldDryMatter": 0.86,
-										"yieldPercentage": 1
-									},
-									{
-										"organId": 4,
-										"type": "YieldComponent",
-										"yieldDryMatter": 0.86,
-										"yieldPercentage": 0.15
-									}
-								]
-							}
+							"species": ["include-from-file", "crops/species/barley.json"],
+							"cultivar": ["include-from-file", "crops/cultivars/winter-barley_bs.json"]
 						},
-						"_cropParams": {
-							"species": ["include-from-file", "crops/barley.json"],
-							"cultivar": ["include-from-file", "crops/barley/winter-barley.json"]
-						},
-						"residueParams": ["include-from-file", "crop-residues/barley.json"]
+						"residueParams": ["include-from-file", "crops/residues/barley.json"]
 					},
 					"earliest-date": "0000-09-10",
 					"latest-date": "0000-10-20",
@@ -119,10 +76,10 @@
 					"crop": {
 						"is-winter-crop": true,
 						"cropParams": {
-							"species": ["include-from-file", "crops/rye.json"],
-							"cultivar": ["include-from-file", "crops/rye/winter-rye.json"]
+							"species": ["include-from-file", "crops/species/rye.json"],
+							"cultivar": ["include-from-file", "crops/cultivars/winter-rye_hhf_Borellus.json"]
 						},
-						"residueParams": ["include-from-file", "crop-residues/rye.json"]
+						"residueParams": ["include-from-file", "crops/residues/rye.json"]
 					},
 					"earliest-date": "0000-10-01",
 					"latest-date": "0000-11-10",
@@ -153,10 +110,10 @@
 					"crop": {
 						"is-winter-crop": true,
 						"cropParams": {
-							"species": ["include-from-file", "crops/rape.json"],
-							"cultivar": ["include-from-file", "crops/rape/winter-rape.json"]
+							"species": ["include-from-file", "crops/species/rape.json"],
+							"cultivar": ["include-from-file", "crops/cultivars/winter-rape.json"]
 						},
-						"residueParams": ["include-from-file", "crop-residues/rape.json"]
+						"residueParams": ["include-from-file", "crops/residues/rape.json"]
 					},
 					"earliest-date": "0000-08-26",
 					"latest-date": "0000-09-10",
@@ -187,10 +144,10 @@
 					"crop": {
 						"is-winter-crop": false,
 						"cropParams": {
-							"species": ["include-from-file", "crops/barley.json"],
-							"cultivar": ["include-from-file", "crops/barley/spring-barley.json"]
+							"species": ["include-from-file", "crops/species/barley.json"],
+							"cultivar": ["include-from-file", "crops/cultivars/spring-barley_hhf_Baroness.json"]
 						},
-						"residueParams": ["include-from-file", "crop-residues/barley.json"]
+						"residueParams": ["include-from-file", "crops/residues/barley.json"]
 					},
 					"earliest-date": "0000-02-11",
 					"latest-date": "0000-05-01",
@@ -199,6 +156,7 @@
 					"min-%-asw": 0,
 					"max-%-asw": 95.0,
 					"max-3d-precip-sum": 2,
+
 					"max-curr-day-precip": 0.1,
 					"temp-sum-above-base-temp": 0,
 					"base-temp": 0
@@ -221,10 +179,10 @@
 					"crop": {
 						"is-winter-crop": false,
 						"cropParams": {
-							"species": ["include-from-file", "crops/sugar-beet.json"],
-							"cultivar": ["include-from-file", "crops/sugar-beet/.json"]
+							"species": ["include-from-file", "crops/species/sugar-beet.json"],
+							"cultivar": ["include-from-file", "crops/cultivars/sugar-beet_bs.json"]
 						},
-						"residueParams": ["include-from-file", "crop-residues/beet.json"]
+						"residueParams": ["include-from-file", "crops/residues/beet.json"]
 					},
 					"earliest-date": "0000-04-01",
 					"latest-date": "0000-05-10",
@@ -255,33 +213,10 @@
 					"crop": {
 						"is-winter-crop": false,
 						"cropParams": {
-							"species": {
-								"=": ["include-from-file", "projects/sustag/maize.json"],
-								"FieldConditionModifier":0.95
-							},
-							"cultivar": {
-								"=": ["include-from-file", "projects/sustag/silage-maize.json"],
-								"OrganIdsForSecondaryYield": [
-									{
-										"organId": 2,
-										"type": "YieldComponent",
-										"yieldDryMatter": 0.32,
-										"yieldPercentage": 0.1
-									},
-									{
-										"organId": 3,
-										"type": "YieldComponent",
-										"yieldDryMatter": 0.32,
-										"yieldPercentage": 0.1
-									}
-								]
-							}
+							"species": ["include-from-file", "crops/species/maize.json"],
+							"cultivar": ["include-from-file", "crops/cultivars/silage-maize_bs.json"]
 						},
-						"_cropParams": {
-							"species": ["include-from-file", "crops/maize.json"],
-							"cultivar": ["include-from-file", "crops/maize/silage-maize.json"]
-						},
-						"residueParams": ["include-from-file", "crop-residues/maize.json"]
+						"residueParams": ["include-from-file", "crops/residues/maize.json"]
 					},
 					"earliest-date": "0000-04-05",
 					"latest-date": "0000-05-10",
@@ -312,10 +247,78 @@
 					"crop": {
 						"is-winter-crop": false,
 						"cropParams": {
-							"species": ["include-from-file", "crops/potato.json"],
-							"cultivar": ["include-from-file", "crops/potato/moderately-early-potato.json"]
+							"species": ["include-from-file", "crops/species/potato.json"],
+							"cultivar": ["include-from-file", "crops/cultivars/moderately-early-potato.json"]
 						},
-						"residueParams": ["include-from-file", "crop-residues/potato.json"]
+						"residueParams": ["include-from-file", "crops/residues/potato.json"]
+					},
+					"earliest-date": "0000-03-25",
+					"latest-date": "0000-05-10",
+					"min-temp": 6.0,
+					"days-in-temp-window": 5,
+					"min-%-asw": 0,
+					"max-%-asw": 97.0,
+					"max-3d-precip-sum": 5,
+					"max-curr-day-precip": 0.5,
+					"temp-sum-above-base-temp": 340,
+					"base-temp": 0
+				},
+				{ 
+					"type": "AutomaticHarvest", 
+					"latest-date": "0000-09-15",
+					"min-%-asw": 0,
+					"max-%-asw": 99.0,
+					"max-3d-precip-sum": 5,
+					"max-curr-day-precip": 0.5,
+					"harvest-time": "maturity"
+				}
+			]
+		}],
+		"KA_sustag": [{
+			"worksteps": [
+				{ 
+					"type": "AutomaticSowing", 
+					"crop": {
+						"is-winter-crop": false,
+						"cropParams": {
+							"species": ["include-from-file", "crops/species/potato.json"],
+							"cultivar": ["include-from-file", "crops/cultivars/moderately-early-potato_sustag.json"]
+						},
+						"residueParams": ["include-from-file", "crops/residues/potato.json"]
+					},
+					"earliest-date": "0000-03-25",
+					"latest-date": "0000-05-10",
+					"min-temp": 6.0,
+					"days-in-temp-window": 5,
+					"min-%-asw": 0,
+					"max-%-asw": 97.0,
+					"max-3d-precip-sum": 5,
+					"max-curr-day-precip": 0.5,
+					"temp-sum-above-base-temp": 340,
+					"base-temp": 0
+				},
+				{ 
+					"type": "AutomaticHarvest", 
+					"latest-date": "0000-09-15",
+					"min-%-asw": 0,
+					"max-%-asw": 99.0,
+					"max-3d-precip-sum": 5,
+					"max-curr-day-precip": 0.5,
+					"harvest-time": "maturity"
+				}
+			]
+		}],
+		"KA_agmip": [{
+			"worksteps": [
+				{ 
+					"type": "AutomaticSowing", 
+					"crop": {
+						"is-winter-crop": false,
+						"cropParams": {
+							"species": ["include-from-file", "crops/species/potato.json"],
+							"cultivar": ["include-from-file", "crops/cultivars/moderately-early-potato_agmip.json"]
+						},
+						"residueParams": ["include-from-file", "crops/residues/potato.json"]
 					},
 					"earliest-date": "0000-03-25",
 					"latest-date": "0000-05-10",
@@ -343,5 +346,8 @@
 
 	"cropRotation": ["ref", "cropRotationTemplates", "WW"],
 	
-	"CropParameters": ["include-from-file", "general/crop.json"]
+	"CropParameters": {
+		"=": ["include-from-file", "general/crop.json"],
+		"__enable_vernalisation_factor_fix__": false
+	}
 }
