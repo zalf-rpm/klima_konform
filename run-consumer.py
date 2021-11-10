@@ -50,25 +50,29 @@ TEMPLATE_LANDUSE_PATH = "{local_path_to_data_dir}germany/landuse_1000_31469_gk5.
 USE_LANDUSE = False
 
 def create_output(msg):
-    cm_count_to_vals = defaultdict(dict)
+    indexval_and_section_to_vals = defaultdict(dict)
     for data in msg.get("data", []):
         results = data.get("results", [])
 
+        is_crop_section = data.get("origSpec", "") == '"crop"'
         is_daily_section = data.get("origSpec", "") == '"daily"'
+        is_yearly_section = data.get("origSpec", "") == '"yearly"'
 
         for vals in results:
-            if "CM-count" in vals:
-                cm_count_to_vals[vals["CM-count"]].update(vals)
-            elif is_daily_section:
-                cm_count_to_vals[vals["Date"]].update(vals)
+            if is_crop_section and "CM-count" in vals and "Harvest-year" in vals:
+                indexval_and_section_to_vals[(f'{vals["CM-count"]}_Harvest-year_{vals["Harvest-year"]}', "season")].update(vals)
+            elif is_daily_section and "Date" in vals:
+                indexval_and_section_to_vals[(vals["Date"], "daily")].update(vals)
+            elif is_yearly_section and "Year" in vals:
+                indexval_and_section_to_vals[(vals["Year"], "yearly")].update(vals)
 
-    cmcs = list(cm_count_to_vals.keys())
-    cmcs.sort()
-    last_cmc = cmcs[-1]
-    if "year" not in cm_count_to_vals[last_cmc]:
-        cm_count_to_vals.pop(last_cmc)
+    #cmcs = list([t[0] for t in cm_count_to_vals.keys()])
+    #cmcs.sort()
+    #last_cmc = cmcs[-1]
+    #if "Year" not in cm_count_to_vals[last_cmc]:
+    #    cm_count_to_vals.pop(last_cmc)
 
-    return cm_count_to_vals
+    return indexval_and_section_to_vals
 
 
 def write_row_to_grids(row_col_data, row, ncols, header, path_to_output_dir, path_to_csv_output_dir, setup_id):
@@ -81,14 +85,20 @@ def write_row_to_grids(row_col_data, row, ncols, header, path_to_output_dir, pat
     make_dict_nparr = lambda: defaultdict(lambda: np.full((ncols,), -9999, dtype=np.float))
     
     output_grids = {
-        "Yield": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 1},
+        ("Yield", "season"): {"data" : make_dict_nparr(), "cast-to": "float", "digits": 1},
+        ("Groundwater_recharge_sum_season", "season"): {"data" : make_dict_nparr(), "cast-to": "float", "digits": 1},
+        ("Groundwater_recharge_sum_year", "yearly"): {"data" : make_dict_nparr(), "cast-to": "float", "digits": 1},
+        ("AET_sum_season", "season"): {"data" : make_dict_nparr(), "cast-to": "float", "digits": 1},
+        ("AET_sum_year", "yearly"): {"data" : make_dict_nparr(), "cast-to": "float", "digits": 1},
+        ("Season_length", "season"): {"data" : make_dict_nparr(), "cast-to": "int"},
+        ("LAI_max_season", "season"): {"data" : make_dict_nparr(), "cast-to": "float", "digits": 1},
         #"TraDef": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 2},
         #"HeatRed": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 2},
         #"FrostRed": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 2},
     }
     output_keys = list(output_grids.keys())
 
-    cmc_to_crop = {}
+    indexval_and_section_to_crop = {}
 
     is_no_data_row = True
     # skip this part if we write just a nodata line
@@ -101,36 +111,36 @@ def write_row_to_grids(row_col_data, row, ncols, header, path_to_output_dir, pat
                     no_data_cols += 1
                     continue
                 else:
-                    cmc_and_year_to_vals = defaultdict(lambda: defaultdict(list))
+                    indexval_and_section_to_vals = defaultdict(lambda: defaultdict(list))
                     for cell_data in rcd_val:
                         # if we got multiple datasets per cell, iterate over them and aggregate them in the following step
-                        for cm_count, data in cell_data.items():
-                            for key in output_keys:
+                        for (indexval, section), data in cell_data.items():
+                            for key in [key for (key, sec) in output_keys if sec == section]:
                                 # store mapping cm_count to crop name for later file name creation
-                                if cm_count not in cmc_to_crop and "Crop" in data:
-                                    cmc_to_crop[cm_count] = data["Crop"]
+                                if (indexval, section) not in indexval_and_section_to_crop and "Crop" in data:
+                                    indexval_and_section_to_crop[(indexval, section)] = data["Crop"]
 
                                 # only further process/store data we actually received
                                 if key in data:
                                     v = data[key]
                                     if isinstance(v, list):
                                         for i, v_ in enumerate(v):
-                                            cmc_and_year_to_vals[(cm_count, data["Year"])][f'{key}_{i+1}'].append(v_)
+                                            indexval_and_section_to_vals[(indexval, section)][f'{key}_{i+1}'].append(v_)
                                     else:
-                                        cmc_and_year_to_vals[(cm_count, data["Year"])][key].append(v)
+                                        indexval_and_section_to_vals[(indexval, section)][key].append(v)
                                 # if a key is missing, because that monica event was never raised/reached, create the empty list
                                 # so a no-data value is being produced
                                 else:
-                                    cmc_and_year_to_vals[(cm_count, data["Year"])][key]
+                                    indexval_and_section_to_vals[(indexval, section)][key]
 
                     # potentially aggregate multiple data per cell and finally store them for this row
-                    for (cm_count, year), key_to_vals in cmc_and_year_to_vals.items():
+                    for (indexval, section), key_to_vals in indexval_and_section_to_vals.items():
                         for key, vals in key_to_vals.items():
-                            output_vals = output_grids[key]["data"]
+                            output_vals = output_grids[(key, section)]["data"]
                             if len(vals) > 0:
-                                output_vals[(cm_count, year)][col] = sum(vals) / len(vals)
+                                output_vals[indexval][col] = sum(vals) / len(vals)
                             else:
-                                output_vals[(cm_count, year)][col] = -9999
+                                output_vals[indexval][col] = -9999
 
         is_no_data_row = no_data_cols == ncols
 
@@ -143,7 +153,7 @@ def write_row_to_grids(row_col_data, row, ncols, header, path_to_output_dir, pat
             file_.write(rowstr +  "\n")
 
     # iterate over all prepared data for a single row and write row
-    for key, y2d_ in output_grids.items():
+    for (key, section), y2d_ in output_grids.items():
         y2d = y2d_["data"]
         cast_to = y2d_["cast-to"]
         digits = y2d_.get("digits", 0)
@@ -152,10 +162,10 @@ def write_row_to_grids(row_col_data, row, ncols, header, path_to_output_dir, pat
         else:
             mold = lambda x: str(round(x, digits))
 
-        for (cm_count, year), row_arr in y2d.items():
-            crop = cmc_to_crop[cm_count] if cm_count in cmc_to_crop else "none"    
+        for indexval, row_arr in y2d.items():
+            crop = indexval_and_section_to_crop[(indexval, section)] + "_" if (indexval, section) in indexval_and_section_to_crop else ""    
             crop = crop.replace("/", "").replace(" ", "")
-            path_to_file = path_to_output_dir + crop + "_" + key + "_" + str(year) + "_" + str(cm_count) + ".asc"
+            path_to_file = path_to_output_dir + crop + key + "_" + str(indexval) + ".asc"
 
             if not os.path.isfile(path_to_file):
                 with open(path_to_file, "w") as _:

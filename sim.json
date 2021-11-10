@@ -30,9 +30,18 @@
 		"events": [
 			"crop", [
 				["CM-count", "FIRST"],
-				["Year", "LAST"],
+				["Year|Harvest-year", "LAST"],
 				["Crop", "FIRST"],
-				["Yield", "LAST"]
+				["Yield", "LAST"],
+				["Recharge|Groundwater_recharge_sum_season", "SUM"],
+				["Act_ET|AET_sum_season", "SUM"],
+				["Count|Season_length", "SUM"],
+				["LAI|LAI_max_season", "MAX"]
+			],
+			"yearly", [
+				["Year", "LAST"],
+				["Recharge|Groundwater_recharge_sum_year", "SUM"],
+				["Act_ET|AET_sum_year", "SUM"]
 			]
 		]
 	},
