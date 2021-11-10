@@ -65,6 +65,8 @@ def create_output(msg):
                 indexval_and_section_to_vals[(vals["Date"], "daily")].update(vals)
             elif is_yearly_section and "Year" in vals:
                 indexval_and_section_to_vals[(vals["Year"], "yearly")].update(vals)
+            elif "Index" in vals:
+                indexval_and_section_to_vals[(vals["Index"], "undef")].update(vals)
 
     #cmcs = list([t[0] for t in cm_count_to_vals.keys()])
     #cmcs.sort()
