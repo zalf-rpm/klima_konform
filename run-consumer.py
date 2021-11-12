@@ -40,7 +40,7 @@ PATHS = {
         "path-to-csv-output-dir": "csv-out/"
     },
     "remoteConsumer-remoteMonica": {
-        "path-to-data-dir": "./monica-data/data/",
+        "path-to-data-dir": "data/",
         "path-to-output-dir": "/out/out/",
         "path-to-csv-output-dir": "/out/csv-out/"
     }
