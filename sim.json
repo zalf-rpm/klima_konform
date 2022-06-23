@@ -41,7 +41,8 @@
 			"yearly", [
 				["Year", "LAST"],
 				["Recharge|Groundwater_recharge_sum_year", "SUM"],
-				["Act_ET|AET_sum_year", "SUM"]
+				["Act_ET|AET_sum_year", "SUM"],
+				["SOC|SOC_0-30_avg_avg_year", [1, 3, "AVG"], "AVG"]
 			]
 		]
 	},

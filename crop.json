@@ -341,7 +341,293 @@
 					"harvest-time": "maturity"
 				}
 			]
-		}]
+		}],
+		"ZR-SG-WW-WG": [
+			{
+				"worksteps": [
+					{ 
+						"type": "AutomaticSowing", 
+						"crop": {
+							"is-winter-crop": false,
+							"cropParams": {
+								"species": ["include-from-file", "crops/species/sugar-beet.json"],
+								"cultivar": ["include-from-file", "crops/cultivars/sugar-beet_bs.json"],
+								"__enable_vernalisation_factor_fix__": false
+							},
+							"residueParams": ["include-from-file", "crops/residues/beet.json"]
+						},
+						"earliest-date": "0000-04-01",
+						"latest-date": "0000-05-10",
+						"min-temp": 6.0,
+						"days-in-temp-window": 5,
+						"min-%-asw": 0,
+						"max-%-asw": 97.0,
+						"max-3d-precip-sum": 5,
+						"max-curr-day-precip": 0.5,
+						"temp-sum-above-base-temp": 340,
+						"base-temp": 0
+					},
+					{ 
+						"type": "AutomaticHarvest", 
+						"latest-date": "0000-10-25",
+						"min-%-asw": 0,
+						"max-%-asw": 99.0,
+						"max-3d-precip-sum": 5,
+						"max-curr-day-precip": 0.5,
+						"harvest-time": "maturity"
+					}
+				]
+			},
+			{
+				"worksteps": [
+					{ 
+						"type": "AutomaticSowing", 
+						"crop": {
+							"is-winter-crop": false,
+							"cropParams": {
+								"species": ["include-from-file", "crops/species/barley.json"],
+								"cultivar": ["include-from-file", "crops/cultivars/spring-barley_hhf_Baroness.json"],
+								"__enable_vernalisation_factor_fix__": true
+							},
+							"residueParams": ["include-from-file", "crops/residues/barley.json"]
+						},
+						"earliest-date": "0000-02-11",
+						"latest-date": "0000-05-01",
+						"min-temp": 7.0,
+						"days-in-temp-window": 5,
+						"min-%-asw": 0,
+						"max-%-asw": 95.0,
+						"max-3d-precip-sum": 2,
+	
+						"max-curr-day-precip": 0.1,
+						"temp-sum-above-base-temp": 0,
+						"base-temp": 0
+					},
+					{ 
+						"type": "AutomaticHarvest", 
+						"latest-date": "0000-09-07",
+						"min-%-asw": 0,
+						"max-%-asw": 99.0,
+						"max-3d-precip-sum": 2,
+						"max-curr-day-precip": 0.1,
+						"harvest-time": "maturity"
+					}
+				]
+			},
+			{
+				"worksteps": [
+					{ 
+						"type": "AutomaticSowing", 
+						"crop": {
+							"is-winter-crop": true,
+							"cropParams": {
+								"species": ["include-from-file", "crops/species/wheat.json"],
+								"cultivar": ["include-from-file", "crops/cultivars/winter-wheat_bs.json"],
+								"__enable_vernalisation_factor_fix__": true
+							},
+							"residueParams": ["include-from-file", "crops/residues/wheat.json"]
+						},
+						"earliest-date": "0000-10-01",
+						"latest-date": "0000-11-10",
+						"min-temp": 18.5,
+						"days-in-temp-window": 14,
+						"min-%-asw": 0,
+						"max-%-asw": 99.9,
+						"max-3d-precip-sum": 2,
+						"max-curr-day-precip": 0.1,
+						"temp-sum-above-base-temp": 0,
+						"base-temp": 0
+					},
+					{ 
+						"type": "AutomaticHarvest", 
+						"latest-date": "0001-09-05",
+						"min-%-asw": 0,
+						"max-%-asw": 99.0,
+						"max-3d-precip-sum": 2,
+						"max-curr-day-precip": 0.1,
+						"harvest-time": "maturity"
+					}
+				]
+			},
+			{
+				"worksteps": [
+					{ 
+						"type": "AutomaticSowing", 
+						"crop": {
+							"is-winter-crop": true,
+							"cropParams": {
+								"species": ["include-from-file", "crops/species/barley.json"],
+								"cultivar": ["include-from-file", "crops/cultivars/winter-barley_bs.json"],
+								"__enable_vernalisation_factor_fix__": true
+							},
+							"residueParams": ["include-from-file", "crops/residues/barley.json"]
+						},
+						"earliest-date": "0000-09-10",
+						"latest-date": "0000-10-20",
+						"min-temp": 18.5,
+						"days-in-temp-window": 14,
+						"min-%-asw": 0,
+						"max-%-asw": 99.9,
+						"max-3d-precip-sum": 2,
+						"max-curr-day-precip": 0.1,
+						"temp-sum-above-base-temp": 0,
+						"base-temp": 0
+					},
+					{ 
+						"type": "AutomaticHarvest", 
+						"latest-date": "0001-09-05",
+						"min-%-asw": 0,
+						"max-%-asw": 99.0,
+						"max-3d-precip-sum": 2,
+						"max-curr-day-precip": 0.1,
+						"harvest-time": "maturity"
+					}
+				]
+			}
+		],
+		"Wra-WW-SM-SG": [
+			{
+				"worksteps": [
+					{ 
+						"type": "AutomaticSowing", 
+						"crop": {
+							"is-winter-crop": true,
+							"cropParams": {
+								"species": ["include-from-file", "crops/species/rape.json"],
+								"cultivar": ["include-from-file", "crops/cultivars/winter-rape.json"],
+								"__enable_vernalisation_factor_fix__": false
+							},
+							"residueParams": ["include-from-file", "crops/residues/rape.json"]
+						},
+						"earliest-date": "0000-08-26",
+						"latest-date": "0000-09-10",
+						"min-temp": 22.0,
+						"days-in-temp-window": 10,
+						"min-%-asw": 0,
+						"max-%-asw": 98.0,
+						"max-3d-precip-sum": 2,
+						"max-curr-day-precip": 0.1,
+						"temp-sum-above-base-temp": 0,
+						"base-temp": 0
+					},
+					{ 
+						"type": "AutomaticHarvest", 
+						"latest-date": "0001-08-15",
+						"min-%-asw": 0,
+						"max-%-asw": 99.0,
+						"max-3d-precip-sum": 2,
+						"max-curr-day-precip": 0.1,
+						"harvest-time": "maturity"
+					}
+				]
+			},
+			{
+				"worksteps": [
+					{ 
+						"type": "AutomaticSowing", 
+						"crop": {
+							"is-winter-crop": true,
+							"cropParams": {
+								"species": ["include-from-file", "crops/species/wheat.json"],
+								"cultivar": ["include-from-file", "crops/cultivars/winter-wheat_bs.json"],
+								"__enable_vernalisation_factor_fix__": true
+							},
+							"residueParams": ["include-from-file", "crops/residues/wheat.json"]
+						},
+						"earliest-date": "0000-10-01",
+						"latest-date": "0000-11-10",
+						"min-temp": 18.5,
+						"days-in-temp-window": 14,
+						"min-%-asw": 0,
+						"max-%-asw": 99.9,
+						"max-3d-precip-sum": 2,
+						"max-curr-day-precip": 0.1,
+						"temp-sum-above-base-temp": 0,
+						"base-temp": 0
+					},
+					{ 
+						"type": "AutomaticHarvest", 
+						"latest-date": "0001-09-05",
+						"min-%-asw": 0,
+						"max-%-asw": 99.0,
+						"max-3d-precip-sum": 2,
+						"max-curr-day-precip": 0.1,
+						"harvest-time": "maturity"
+					}
+				]
+			},
+			{
+				"worksteps": [
+					{ 
+						"type": "AutomaticSowing", 
+						"crop": {
+							"is-winter-crop": false,
+							"cropParams": {
+								"species": ["include-from-file", "crops/species/maize.json"],
+								"cultivar": ["include-from-file", "crops/cultivars/silage-maize_bs.json"],
+								"__enable_vernalisation_factor_fix__": true
+							},
+							"residueParams": ["include-from-file", "crops/residues/maize.json"]
+						},
+						"earliest-date": "0000-04-05",
+						"latest-date": "0000-05-10",
+						"min-temp": 8.0,
+						"days-in-temp-window": 5,
+						"min-%-asw": 0,
+						"max-%-asw": 97.0,
+						"max-3d-precip-sum": 5,
+						"max-curr-day-precip": 0.5,
+						"temp-sum-above-base-temp": 380,
+						"base-temp": 0
+					},
+					{ 
+						"type": "AutomaticHarvest", 
+						"latest-date": "0000-09-10",
+						"min-%-asw": 0,
+						"max-%-asw": 99.0,
+						"max-3d-precip-sum": 5,
+						"max-curr-day-precip": 0.5,
+						"harvest-time": "maturity"
+					}
+				]
+			},
+			{
+				"worksteps": [
+					{ 
+						"type": "AutomaticSowing", 
+						"crop": {
+							"is-winter-crop": false,
+							"cropParams": {
+								"species": ["include-from-file", "crops/species/barley.json"],
+								"cultivar": ["include-from-file", "crops/cultivars/spring-barley_hhf_Baroness.json"],
+								"__enable_vernalisation_factor_fix__": false
+							},
+							"residueParams": ["include-from-file", "crops/residues/barley.json"]
+						},
+						"earliest-date": "0000-02-11",
+						"latest-date": "0000-05-01",
+						"min-temp": 7.0,
+						"days-in-temp-window": 5,
+						"min-%-asw": 0,
+						"max-%-asw": 95.0,
+						"max-3d-precip-sum": 2,
+	
+						"max-curr-day-precip": 0.1,
+						"temp-sum-above-base-temp": 0,
+						"base-temp": 0
+					},
+					{ 
+						"type": "AutomaticHarvest", 
+						"latest-date": "0000-09-07",
+						"min-%-asw": 0,
+						"max-%-asw": 99.0,
+						"max-3d-precip-sum": 2,
+						"max-curr-day-precip": 0.1,
+						"harvest-time": "maturity"
+					}
+				]
+			}
+		]
 	},
 
 	"cropRotation": ["ref", "cropRotationTemplates", "WW"],

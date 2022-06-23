@@ -85,7 +85,7 @@ def run_producer(server = {"server": None, "port": None}, shared_id = None):
         "crop.json": "crop.json",
         "site.json": "site.json",
         "setups-file": "sim_setups.csv",
-        "run-setups": "[2611]",
+        "run-setups": "[260109]",
         "shared_id": shared_id
     }
     
@@ -212,7 +212,12 @@ def run_producer(server = {"server": None, "port": None}, shared_id = None):
         with open(setup.get("crop.json", config["crop.json"])) as _:
             crop_json = json.load(_)
 
-        crop_json["CropParameters"]["__enable_vernalisation_factor_fix__"] = setup["use_vernalisation_fix"] if "use_vernalisation_fix" in setup else False
+        uvfs = str(setup["use_vernalisation_fix"]).split("-")
+        if len(uvfs) > 1:    
+            for i, uvf in enumerate(uvfs):
+                crop_json["cropRotationTemplates"][crop_id][i]["worksteps"][0]["crop"]["cropParams"]["__enable_vernalisation_factor_fix__"] = uvf.lower() == "true"
+        else:
+            crop_json["CropParameters"]["__enable_vernalisation_factor_fix__"] = setup["use_vernalisation_fix"] if "use_vernalisation_fix" in setup else False
 
         # set the current crop used for this run id
         crop_json["cropRotation"][2] = crop_id
