@@ -92,7 +92,7 @@ def write_row_to_grids(row_col_data, row, ncols, header, path_to_output_dir, pat
         ("Groundwater_recharge_sum_year", "yearly"): {"data" : make_dict_nparr(), "cast-to": "float", "digits": 1},
         ("AET_sum_season", "season"): {"data" : make_dict_nparr(), "cast-to": "float", "digits": 1},
         ("AET_sum_year", "yearly"): {"data" : make_dict_nparr(), "cast-to": "float", "digits": 1},
-        ("SOC_0-30_avg_avg_year", "yearly"): {"data" : make_dict_nparr(), "cast-to": "float", "digits": 1},
+        ("SOC_0-30_avg_avg_year", "yearly"): {"data" : make_dict_nparr(), "cast-to": "float", "digits": 4},
         ("Season_length", "season"): {"data" : make_dict_nparr(), "cast-to": "int"},
         ("LAI_max_season", "season"): {"data" : make_dict_nparr(), "cast-to": "float", "digits": 1},
         #"TraDef": {"data" : make_dict_nparr(), "cast-to": "float", "digits": 2},
