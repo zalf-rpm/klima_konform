@@ -25,7 +25,7 @@
 			"csv-separator": ","
 		},
 
-		"obj-outputs?": true,
+		"obj-outputs?": false,
 
 		"_events": [
 			"crop", [
