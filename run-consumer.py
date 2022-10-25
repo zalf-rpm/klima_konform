@@ -439,8 +439,8 @@ def run_consumer(leave_after_finished_run = True, server = {"server": None, "por
 
             custom_id = msg["customId"]
             setup_id = custom_id["setup_id"]
-            row = custom_id["srow"]
-            col = custom_id["scol"]
+            row = custom_id["row"]
+            col = custom_id["col"]
             
             process_message.wnof_count += 1
 
