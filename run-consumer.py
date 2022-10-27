@@ -18,6 +18,7 @@
 from collections import defaultdict, OrderedDict
 import csv
 from datetime import datetime
+import io
 import json
 import gc
 import numpy as np
@@ -42,10 +43,11 @@ PATHS = {
     },
     "remoteConsumer-remoteMonica": {
         "path-to-data-dir": "data/",
-        "path-to-final-output-dir": "/out/out/",
-        "path-to-output-dir": "/project/scratch/rpm/klima_konform/out/out/",
-        #"path-to-csv-output-dir": "/out/csv-out/",
-        "path-to-csv-output-dir": "/project/scratch/rpm/klima_konform/out/csv-out/"
+        #"path-to-final-output-dir": "/out/out/",
+        "path-to-output-dir": "/out/out/",
+        #"path-to-output-dir": "/project/scratch/rpm/klima_konform/out/out/",
+        "path-to-csv-output-dir": "/out/csv-out/",
+        #"path-to-csv-output-dir": "/project/scratch/rpm/klima_konform/out/csv-out/"
     }
 }
 TEMPLATE_SOIL_PATH = "{local_path_to_data_dir}germany/buek200_1000_25832_etrs89-utm32n.asc"
@@ -457,7 +459,8 @@ def run_consumer(leave_after_finished_run = True, server = {"server": None, "por
 
             #with open("out/out-" + str(i) + ".csv", 'wb') as _:
             with open(path_to_out_dir + "col-" + str(col) + ".csv", "w", newline='') as _:
-                writer = csv.writer(_, delimiter=",")
+                sio = io.StringIO()
+                writer = csv.writer(sio, delimiter=",")
 
                 for data_ in msg.get("data", []):
                     results = data_.get("results", [])
@@ -476,6 +479,9 @@ def run_consumer(leave_after_finished_run = True, server = {"server": None, "por
                             writer.writerow(row)
 
                     writer.writerow([])
+
+                _.write(sio.getvalue())
+                sio.close()
 
             process_message.received_env_count = process_message.received_env_count + 1
 
@@ -497,15 +503,15 @@ def run_consumer(leave_after_finished_run = True, server = {"server": None, "por
             print('no response from the server (with "timeout"=%d ms) ' % socket.RCVTIMEO)
 
             # copy directory to output directory
-            if write_normal_output_files:
-                if not os.path.exists(paths["path-to-final-output-dir"]):
-                    try:
-                        os.makedirs(paths["path-to-final-output-dir"])
-                    except OSError:
-                        print("c: Couldn't create dir:", paths["path-to-final-output-dir"], "! Exiting.")
-                        exit(1)
-                shutil.copytree(config["out"], paths["path-to-final-output-dir"])
-                shutil.rmtree(config["out"])
+            # if write_normal_output_files:
+            #     if not os.path.exists(paths["path-to-final-output-dir"]):
+            #         try:
+            #             os.makedirs(paths["path-to-final-output-dir"])
+            #         except OSError:
+            #             print("c: Couldn't create dir:", paths["path-to-final-output-dir"], "! Exiting.")
+            #             exit(1)
+            #     shutil.copytree(config["out"], paths["path-to-final-output-dir"])
+            #     shutil.rmtree(config["out"])
             return
         except Exception as e:
             print("Exception:", e)
