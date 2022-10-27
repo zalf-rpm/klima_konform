@@ -451,8 +451,8 @@ def run_consumer(leave_after_finished_run = True, server = {"server": None, "por
             if not os.path.exists(path_to_out_dir):
                 try:
                     os.makedirs(path_to_out_dir)
-                except OSError:
-                    print("c: Couldn't create dir:", path_to_out_dir, "! Exiting.")
+                except OSError as ose:
+                    print("c: Couldn't create dir:", path_to_out_dir, "! Exiting. Error:", ose)
                     exit(1)
 
             #with open("out/out-" + str(i) + ".csv", 'wb') as _:
