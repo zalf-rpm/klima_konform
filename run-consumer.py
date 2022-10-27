@@ -23,6 +23,7 @@ import gc
 import numpy as np
 import os
 from pyproj import CRS, Transformer
+import shutil
 import sqlite3
 import sys
 import timeit
@@ -41,8 +42,10 @@ PATHS = {
     },
     "remoteConsumer-remoteMonica": {
         "path-to-data-dir": "data/",
-        "path-to-output-dir": "/out/out/",
-        "path-to-csv-output-dir": "/out/csv-out/"
+        "path-to-final-output-dir": "/out/out/",
+        "path-to-output-dir": "/scratch/klima_konform/out/out/",
+        #"path-to-csv-output-dir": "/out/csv-out/",
+        "path-to-csv-output-dir": "/scratch/klima_konform/out/csv-out/"
     }
 }
 TEMPLATE_SOIL_PATH = "{local_path_to_data_dir}germany/buek200_1000_25832_etrs89-utm32n.asc"
@@ -492,6 +495,16 @@ def run_consumer(leave_after_finished_run = True, server = {"server": None, "por
             #print("time to process message" + str(elapsed))
         except zmq.error.Again as _e:
             print('no response from the server (with "timeout"=%d ms) ' % socket.RCVTIMEO)
+
+            # copy directory to output directory
+            if write_normal_output_files:
+                if not os.path.exists(paths["path-to-final-output-dir"]):
+                    try:
+                        os.makedirs(paths["path-to-final-output-dir"])
+                    except OSError:
+                        print("c: Couldn't create dir:", paths["path-to-final-output-dir"], "! Exiting.")
+                        exit(1)
+                shutil.copytree(config["out"], paths["path-to-final-output-dir"])
             return
         except Exception as e:
             print("Exception:", e)
