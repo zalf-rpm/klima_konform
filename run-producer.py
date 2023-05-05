@@ -84,8 +84,8 @@ def run_producer(server = {"server": None, "port": None}, shared_id = None):
         "sim.json": "sim.json",
         "crop.json": "crop.json",
         "site.json": "site.json",
-        "setups-file": "sim_setups.csv",
-        "run-setups": "[260109]",
+        "setups-file": "sim_setups_6th_run.csv",
+        "run-setups": "[]",
         "shared_id": shared_id
     }
     
@@ -109,6 +109,8 @@ def run_producer(server = {"server": None, "port": None}, shared_id = None):
     # read setup from csv file
     setups = Mrunlib.read_sim_setups(config["setups-file"])
     run_setups = json.loads(config["run-setups"])
+    if len(run_setups) == 0:
+        run_setups = list(setups.keys())
     print("read sim setups: ", config["setups-file"])
 
     soil_crs_to_x_transformers = {}
@@ -392,6 +394,9 @@ def run_producer(server = {"server": None, "port": None}, shared_id = None):
 
                 if setup["CO2"]:
                     env_template["params"]["userEnvironmentParameters"]["AtmosphericCO2"] = float(setup["CO2"])
+
+                if setup["rcp"]:
+                    env_template["params"]["userEnvironmentParameters"]["rcp"] = setup["rcp"]
 
                 if setup["O3"]:
                     env_template["params"]["userEnvironmentParameters"]["AtmosphericO3"] = float(setup["O3"])

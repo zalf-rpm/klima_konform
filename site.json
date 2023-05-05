@@ -2,14 +2,15 @@
   "SiteParameters": {
     "Latitude": 52.80939865112305,
     "Slope": 0,
-    "HeightNN": [0 , "m"],
+    "HeightNN": [
+      0,
+      "m"
+    ],
     "NDeposition": 30,
-		
     "SoilProfileParameters": []
   },
-	
   "SoilTemperatureParameters": ["include-from-file", "general/soil-temperature.json"],
-	"EnvironmentParameters": {
+  "EnvironmentParameters": {
     "=": ["include-from-file", "general/environment.json"],
     "LeachingDepth": 2.0,
     "WindSpeedHeight": 2.5

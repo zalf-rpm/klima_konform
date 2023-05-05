@@ -25,9 +25,9 @@
 			"csv-separator": ","
 		},
 
-		"obj-outputs?": false,
+		"obj-outputs?": true,
 
-		"_events": [
+		"events": [
 			"crop", [
 				["CM-count", "FIRST"],
 				["Year|Harvest-year", "LAST"],
@@ -46,7 +46,7 @@
 			]
 		],
 
-		"events": [
+		"_events": [
 			"daily", [
 				"Date",
 				"Tmin",
@@ -76,8 +76,8 @@
 			"nitrateConcentration": [0, "mg dm-3"],
 			"sulfateConcentration": [0, "mg dm-3"]
 		},
-		"amount": [0, "mm"],
-		"threshold": 0.9
+		"amount": [10, "mm"],
+		"threshold": 0.4
 	},
 
 	"UseNMinMineralFertilisingMethod": true,
